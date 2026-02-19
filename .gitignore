@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.yarn/
+*.js
+*.js.map
+*.d.ts
+_*

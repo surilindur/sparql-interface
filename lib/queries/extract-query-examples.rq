@@ -1,0 +1,13 @@
+# Extract query examples from an endpoint, for more example queries see the SIB repository:
+# https://github.com/sib-swiss/sparql-examples
+
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX idsm: <https://idsm.elixir-czech.cz/.well-known/>
+
+SELECT DISTINCT ?query ?comment ?content WHERE {
+  ?query rdf:type sh:SPARQLExecutable .
+  ?query rdfs:comment ?comment .
+  ?query sh:select ?content .
+}
