@@ -251,6 +251,18 @@ pre {
   max-width: 4rem;
   width: auto;
   height: auto;
+  padding: .2rem;
+  transition-property: transform;
+  transition-duration: .2s;
+  transition-timing-function: ease;
+}
+
+.sparqldetails td svg:hover,
+.sparqlresults td svg:hover {
+  position: static;
+  transform: scale(5);
+  background-color: var(--color-background);
+  box-shadow: 0 0 .1rem var(--color-secondary);
 }
 
 .sparqlresults>table>tbody>tr>td:not(.index):hover {
