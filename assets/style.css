@@ -124,10 +124,6 @@ td.index {
   text-align: right;
 }
 
-small {
-  opacity: .6;
-}
-
 /* Layout */
 
 main>section {
@@ -253,8 +249,8 @@ pre {
   height: auto;
   padding: .2rem;
   transition-property: transform;
-  transition-duration: .2s;
-  transition-timing-function: ease;
+  transition-duration: .15s;
+  transition-timing-function: linear;
 }
 
 .sparqldetails td svg:hover,
