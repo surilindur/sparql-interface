@@ -4,7 +4,7 @@ import { onMounted, ref, useTemplateRef } from 'vue'
 import { renderHierarchy } from '../logic/hierarchy'
 import { renderSpectrum } from '../logic/spectrum'
 import { inlineVectorImages, updateLinkProperties } from '../logic/elements'
-import { invocationCount, queryCount } from '../logic/query'
+import { invocationCount, queryCount, dataFactory } from '../logic/query'
 
 const props = defineProps<{
   entity: RDF.Term,
@@ -14,6 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void,
+  (e: 'inspect', entity: RDF.Term): void,
 }>()
 
 const container = useTemplateRef('container')
@@ -54,6 +55,17 @@ async function visualiseCustomElements(): Promise<void> {
   }
   await inlineVectorImages(container.value!)
   updateLinkProperties(container.value!)
+  for (const link of container.value!.getElementsByTagName('a')) {
+    const href = link.getAttribute('href')
+    if (href) {
+      link.addEventListener('click', (event: MouseEvent) => {
+        event.preventDefault()
+        const e = dataFactory.namedNode(href)
+        console.log('INSPECT', e)
+        emit('inspect', e)
+      })
+    }
+  }
 }
 
 async function visualiseResult(): Promise<void> {

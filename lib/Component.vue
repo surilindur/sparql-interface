@@ -21,6 +21,11 @@ function executeQuery(endpoint: string, query: string): void {
   currentEndpoint.value = endpoint
   currentQuery.value = query
 }
+
+function inspectEntity(entity: RDF.Term): void {
+  inspectedEntity.value = undefined
+  setTimeout(() => inspectedEntity.value = entity)
+}
 </script>
 
 <template>
@@ -29,6 +34,7 @@ function executeQuery(endpoint: string, query: string): void {
     :entity="inspectedEntity"
     :dom-parser="domParser"
     :visualise="(e) => visualisePage(e, currentEndpoint!)"
+    @inspect="inspectEntity"
     @close="inspectedEntity = undefined"
   />
   <ResultView
@@ -39,7 +45,7 @@ function executeQuery(endpoint: string, query: string): void {
     :query="currentQuery"
     :dom-parser="domParser"
     @close="queryRunning = false"
-    @inspect="(entity: RDF.Term | undefined) => inspectedEntity = entity"
+    @inspect="inspectEntity"
   />
   <TemplateView
     v-if="editTemplates"

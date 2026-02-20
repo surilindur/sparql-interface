@@ -11,7 +11,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'inspect', term: RDF.Term | undefined): void,
+  (e: 'inspect', term: RDF.Term): void,
 }>()
 
 const intersectionListeners = new Map<Element, () => void>()
@@ -66,7 +66,11 @@ function addIntersectionListener(element: Element, listener: () => void): void {
           :visualise="visualise"
           :dom-parser="domParser"
           @listen="addIntersectionListener"
-          @click="() => emit('inspect', mapping[variable.value])"
+          @click="() => {
+            if (mapping[variable.value]) {
+              emit('inspect', mapping[variable.value]!)
+            }
+          }"
         />
       </tr>
     </tbody>

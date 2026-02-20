@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void,
-  (e: 'inspect', entity: RDF.Term | undefined): void,
+  (e: 'inspect', entity: RDF.Term): void,
 }>()
 
 let resultStream: _Readable | undefined
@@ -131,7 +131,7 @@ onMounted(executeQuery)
       :variables="resultVariables"
       :visualise="visualise"
       :dom-parser="domParser"
-      @inspect="(term: RDF.Term | undefined) => emit('inspect', term)"
+      @inspect="(term: RDF.Term) => emit('inspect', term)"
     />
   </section>
 </template>
