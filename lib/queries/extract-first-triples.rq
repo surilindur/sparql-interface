@@ -1,5 +1,5 @@
 # Extract the first 100 triples from the dataset
 
 SELECT ?subject ?predicate ?object WHERE {
-    ?subject ?predicate ?object .
+  ?subject ?predicate ?object .
 } LIMIT 100

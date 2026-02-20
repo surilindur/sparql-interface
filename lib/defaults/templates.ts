@@ -5,7 +5,6 @@ import type { ITemplate } from '../types/template'
 import itemChebiCompound from '../templates/item/chebi/Compound.ejs?raw'
 
 import itemChemblAssay from '../templates/item/chembl/Assay.ejs?raw'
-import itemChemblBindingSite from '../templates/item/chembl/BindingSite.ejs?raw'
 import itemChemblBioComponent from '../templates/item/chembl/BioComponent.ejs?raw'
 import itemChemblCellLine from '../templates/item/chembl/CellLine.ejs?raw'
 import itemChemblDrugIndication from '../templates/item/chembl/DrugIndication.ejs?raw'
@@ -104,10 +103,6 @@ const templates: ITemplate[] = [
   {
     matcher: /\/chembl\/assay\//,
     item: itemChemblAssay
-  },
-  {
-    matcher: /\/chembl\/bindingsite\//,
-    item: itemChemblBindingSite
   },
   {
     matcher: /\/chembl\/biocomponent\//,

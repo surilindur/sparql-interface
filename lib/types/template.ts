@@ -14,7 +14,7 @@ interface ITemplateContext extends Data {
   select: (query: string, bindings?: IBindings[], endpoint?: string) => Promise<IBindings[]>;
   ask: (query: string, bindings?: IBindings[], endpoint?: string) => Promise<boolean>;
   hash: (data: string) => string;
-  uriToLabel: (uri: string) => string;
+  label: (entity: RDF.Term, endpoint?: string) => Promise<string>;
 }
 
 export type { ITemplate, ITemplateContext }

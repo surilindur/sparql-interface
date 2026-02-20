@@ -1,0 +1,31 @@
+# Extract the label for the designated entity.
+
+PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX frapo: <http://purl.org/cerif/frapo/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+PREFIX vocab: <http://rdf.ncbi.nlm.nih.gov/pubchem/vocabulary#>
+
+SELECT ?entity ?label WHERE
+{
+  {
+    # MoNA experiments
+    ?entity sio:SIO_000230 / sio:SIO_000008 ?D .
+    ?D rdf:type sio:CHEMINF_000043 .
+    ?D sio:SIO_000300 ?label .
+  }
+  UNION
+  {
+    # PubChem compounds with standardised equivalents
+    ?entity sio:CHEMINF_000477 / skos:prefLabel ?label .
+  }
+  UNION
+  {
+    ?entity cco:bindingSiteName|frapo:hasGrantNumber|skos:prefLabel|vcard:fn|dcterms:identifier|dcterms:title|rdfs:label|sio:SIO_000300 ?label .
+  }
+  FILTER(isLiteral(?label) && !isBlank(?label))
+}

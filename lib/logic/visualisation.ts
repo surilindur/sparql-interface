@@ -3,6 +3,7 @@ import ejs from 'ejs'
 import MurmurHash3 from 'imurmurhash'
 
 import type { ITemplateContext } from '../types/template'
+import { extractEntityLabel } from '../defaults/queries'
 import { findTemplates } from './template'
 import { select } from './queryselect'
 import { ask } from './queryask'
@@ -13,19 +14,15 @@ function hash(data: string): string {
   return MurmurHash3(data).result().toString(16)
 }
 
-function uriToLabel(uri: string): string {
-  if (!uri.includes('?')) {
-    const potentialLabels = [
-      uri.split('#').at(1)?.trim() ?? '',
-      ...uri.split('#')[0]!.split('/').map(s => s.trim()).reverse()
-    ]
-    for (const label of potentialLabels) {
-      if (label.length > 0) {
-        return label
-      }
+async function queryEntityLabel(endpoint: string, entity: RDF.Term): Promise<string> {
+  if (entity.termType === 'NamedNode') {
+    const bindings = await select(endpoint, extractEntityLabel, [ { entity } ])
+    const label = bindings.at(0)?.label?.value
+    if (label) {
+      return label
     }
   }
-  return uri
+  return entity.value
 }
 
 async function visualiseItem(entity: RDF.Term | undefined, endpoint: string): Promise<string> {
@@ -35,8 +32,8 @@ async function visualiseItem(entity: RDF.Term | undefined, endpoint: string): Pr
         const context: ITemplateContext = {
           entity,
           hash,
-          uriToLabel,
-          visualise: (entity: RDF.Term) => visualiseItem(entity, endpoint),
+          label: (entity, source) => queryEntityLabel(source ?? endpoint, entity),
+          visualise: (entity) => visualiseItem(entity, endpoint),
           select: (query, bindings, source) => select(source ?? endpoint, query, bindings ?? []),
           ask: (query, bindings, source) => ask(source ?? endpoint, query, bindings ?? [])
         }
@@ -54,8 +51,8 @@ async function visualisePage(entity: RDF.Term, endpoint: string): Promise<string
   const context: ITemplateContext = {
     entity,
     hash,
-    uriToLabel,
-    visualise: (entity: RDF.Term) => visualiseItem(entity, endpoint),
+    label: (entity, source) => queryEntityLabel(source ?? endpoint, entity),
+    visualise: (entity) => visualiseItem(entity, endpoint),
     select: (query, bindings, source) => select(source ?? endpoint, query, bindings ?? []),
     ask: (query, bindings, source) => ask(source ?? endpoint, query, bindings ?? [])
   }
