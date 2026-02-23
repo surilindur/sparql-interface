@@ -45,6 +45,8 @@ import itemPubchemProtein from '../templates/item/pubchem/Protein.ejs?raw'
 import itemPubchemReference from '../templates/item/pubchem/Reference.ejs?raw'
 import itemPubchemSubstance from '../templates/item/pubchem/Substance.ejs?raw'
 
+import itemUniprotProtein from '../templates/item/uniprot/Protein.ejs?raw'
+
 import itemWikidataCompound from '../templates/item/wikidata/Compound.ejs?raw'
 
 // Page templates for long full-page visualisations
@@ -270,7 +272,11 @@ const templates: ITemplate[] = [
     page: pagePubchemSubstance
   },
   {
-    matcher: /\/entity\/Q/,
+    matcher: /\/uniprot\/[A-Z][0-9]+/,
+    item: itemUniprotProtein
+  },
+  {
+    matcher: /\/entity\/Q[0-9]+/,
     item: itemWikidataCompound,
     page: pageWikidataCompound
   }
