@@ -1,0 +1,37 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/pubchem/Compound.vm
+
+const label = await querySelectFirst(`
+  PREFIX descriptor: <http://rdf.ncbi.nlm.nih.gov/pubchem/descriptor/>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  SELECT ?label FROM pubchem:compound FROM descriptor:compound WHERE
+  {
+    ?entity sio:SIO_000008 ?D .
+    ?D rdf:type sio:CHEMINF_000382 .
+    ?D sio:SIO_000300 ?label .
+  }
+`, [{ entity }])
+
+const structuresExist = await queryAsk(`
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  ASK FROM pubchem:compound WHERE
+  {
+    ?S rdf:type sio:SIO_011120.
+    ?S sio:SIO_000011 ?entity.
+    ?S sio:SIO_000300 ?V.
+  }
+`, [{ entity }])
+
+const imageUrl = entity.value.replace(/.+\/CID(.+)$/, 'https://idsm.elixir-czech.cz/chemweb/pubchem/compound/svg?id=$1')
+%>
+
+<% if (structuresExist) { %>
+<object data="<%= imageUrl %>" type="image/svg+xml"></object>
+<% } %>
+
+<a href="<%= entity.value %>"><%= label?.label?.value ?? entity.value %></a>

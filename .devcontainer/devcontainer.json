@@ -1,28 +1,21 @@
 {
-  "name": "Node 24 TypeScript",
-  "build": {
-    "dockerfile": "./Dockerfile"
-  },
+  "name": "Node.js & TypeScript",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:latest",
   "customizations": {
     "vscode": {
       "extensions": [
-        "DigitalBrainstem.javascript-ejs-support",
         "dbaeumer.vscode-eslint",
         "github.vscode-github-actions",
         "ms-azuretools.vscode-containers",
-        "rdfox.rdfox-rdf",
-        "redhat.vscode-xml",
-        "vue.volar"
+        "rdfox.rdfox-rdf"
       ],
       "settings": {
-        "chat.disableAIFeatures": true,
         "editor.formatOnSave": true,
         "eslint.format.enable": true,
         "eslint.validate": [
           "javascript",
           "json",
-          "typescript",
-          "vue"
+          "typescript"
         ],
         "files.associations": {
           "*.ejs": "html"
@@ -32,9 +25,6 @@
         },
         "html.format.templating": true,
         "redhat.telemetry.enabled": false,
-        "[vue]": {
-          "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-        },
         "[javascript]": {
           "editor.defaultFormatter": "dbaeumer.vscode-eslint"
         },

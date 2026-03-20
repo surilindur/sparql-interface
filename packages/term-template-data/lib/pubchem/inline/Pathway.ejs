@@ -1,0 +1,33 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/pubchem/Pathway.vm
+
+const pathway = await querySelectFirst(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+  SELECT ?label FROM pubchem:pathway WHERE
+  {
+    ?entity rdfs:label|skos:prefLabel ?label .
+  }
+`, [{ entity }])
+
+const organism = await querySelectFirst(`
+  PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX up: <http://purl.uniprot.org/core/>
+
+  SELECT ?uri ?label FROM pubchem:pathway FROM pubchem:taxonomy WHERE
+  {
+    ?entity up:organism ?uri .
+    ?uri skos:prefLabel ?label .
+  }
+`, [{ entity }])
+%>
+
+<a href="<%= entity.value %>"><%= pathway?.label?.value ?? entity.value %></a>
+
+<% if (organism) { %>
+<small>
+  <a href="<%= organism.uri.value %>"><%= organism.label.value %></a>
+</small>
+<% } %>

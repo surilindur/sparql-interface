@@ -1,0 +1,50 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/pubchem/Gene.vm
+
+const gene = await querySelectFirst(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+  SELECT ?label FROM pubchem:gene WHERE
+  {
+    ?entity rdfs:label|skos:prefLabel ?label .
+  }
+`, [{ entity }])
+
+const symbol = await querySelectFirst(`
+  PREFIX bao: <http://www.bioassayontology.org/bao#>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  SELECT ?uri ?label FROM pubchem:gene WHERE
+  {
+    ?entity bao:BAO_0002870 ?uri .
+    ?uri sio:SIO_000300 ?label .
+  }
+`, [{ entity }])
+
+const organism = await querySelectFirst(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+  PREFIX up: <http://purl.uniprot.org/core/>
+
+  SELECT ?uri ?label FROM pubchem:gene FROM pubchem:taxonomy WHERE
+  {
+    ?entity up:organism ?uri .
+    ?uri skos:prefLabel ?label .
+  }
+`, [{ entity }])
+%>
+
+<span>
+  <% if (symbol) { %>
+    <a href="<%= symbol.uri.value %>"><%= symbol.label.value %></a>
+  <% } %>
+  <a href="<%= entity.value %>"><%= gene?.label?.value ?? entity.value %></a>
+</span>
+
+<% if (organism) { %>
+<small>
+  <a href="<%= organism.uri.value %>"><%= organism.label.value %></a>
+</small>
+<% } %>

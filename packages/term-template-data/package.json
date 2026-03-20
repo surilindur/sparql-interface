@@ -1,0 +1,9 @@
+{
+  "name": "@idsm-src/term-template-data",
+  "version": "0.0.0",
+  "private": true,
+  "main": "lib/index.ts",
+  "dependencies": {
+    "@idsm-src/types": "^0.0.0"
+  }
+}

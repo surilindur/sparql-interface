@@ -1,0 +1,15 @@
+{
+  "files": [
+    "lib/QueryRunnerWorker.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ESNext",
+      "WebWorker",
+      "ESNext.AsyncIterable"
+    ],
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "bundler"
+  }
+}

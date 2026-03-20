@@ -1,0 +1,24 @@
+{
+  "name": "@idsm-src/query-runner",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@traqula/algebra-sparql-1-1": "^1.0.0",
+    "@traqula/algebra-transformations-1-1": "^1.0.0",
+    "@traqula/generator-sparql-1-1": "^1.0.0",
+    "@traqula/parser-sparql-1-1": "^1.0.0",
+    "fetch-sparql-endpoint": "^7.0.0",
+    "imurmurhash": "^0.1.0",
+    "lru-cache": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/imurmurhash": "^0.1.0",
+    "typescript": "^5.0.0"
+  }
+}

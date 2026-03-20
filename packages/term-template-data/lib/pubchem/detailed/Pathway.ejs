@@ -1,0 +1,81 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/page/pubchem/Pathway.vm
+
+const title = (await select(`
+  PREFIX dcterms: <http://purl.org/dc/terms/>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+
+  SELECT ?title FROM pubchem:pathway WHERE
+  {
+    ?entity dcterms:title ?title .
+  }
+`, [{ entity }])).at(0)?.title
+
+const match = (await select(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+  SELECT ?match FROM pubchem:pathway WHERE
+  {
+    ?entity skos:exactMatch ?match
+  }
+`, [{ entity }])).at(0)?.match
+
+const organismVisualisations = (await select(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX up: <http://purl.uniprot.org/core/>
+
+  SELECT ?organism FROM pubchem:pathway WHERE
+  {
+    ?entity up:organism ?organism
+  }
+`, [{ entity }])).map(b => visualise(b.organism))
+
+const componentVisualisations = (await select(`
+  PREFIX bp: <http://www.biopax.org/release/biopax-level3.owl#>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+
+  SELECT ?component FROM pubchem:pathway WHERE
+  {
+    ?entity bp:pathwayComponent ?component .
+  }
+`, [{ entity }])).map(b => visualise(b.component))
+%>
+
+<table>
+  <tbody>
+    <% if (match) { %>
+    <tr>
+      <th>Source</th>
+      <td>
+        <a href="<%= match.value %>"><%= match.value %></a>
+      </td>
+    </tr>
+    <% } %>
+    <% if (title) { %>
+    <tr>
+      <th>Title</th>
+      <td><%- await visualise(title) %></td>
+    </tr>
+    <% } %>
+    <% if (organismVisualisations.length > 0) { %>
+    <tr>
+      <th>Organisms</th>
+      <td>
+        <% for (const visualisation of organismVisualisations) { %>
+        <%- await visualisation %>
+        <% } %>
+      </td>
+    </tr>
+    <% } %>
+    <% if (componentVisualisations.length > 0) { %>
+    <tr>
+      <th>Components</th>
+      <td>
+        <% for (const visualisation of componentVisualisations) { %>
+        <%- await visualisation %>
+        <% } %>
+      </td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>

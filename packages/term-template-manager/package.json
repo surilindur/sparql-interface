@@ -1,0 +1,21 @@
+{
+  "name": "@idsm-src/term-templates",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@idsm-src/term-template-data": "^0.0.0",
+    "@idsm-src/types": "^0.0.0",
+    "@rdfjs/types": "^2.0.0",
+    "@types/ejs": "^3.0.0",
+    "ejs": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,23 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/mesh/Mesh.vm
+
+const typeData = await querySelectFirst(`
+  PREFIX dataset: <http://bioinfo.iocb.cz/dataset/>
+  PREFIX mesh: <http://id.nlm.nih.gov/mesh/>
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+  SELECT ?type ?label FROM mesh:heading FROM dataset:ontology WHERE
+  {
+    ?entity rdf:type ?type .
+    ?type rdfs:label ?label .
+  }
+`, [{ entity }])
+%>
+
+<a href="<%= entity.value %>"><%= entity.value %></a>
+
+<% if (typeData) { %>
+<small class="datatype">
+  <a href="<%= typeData.type.value %>"><%= typeData.label.value %></a>
+</small>
+<% } %>

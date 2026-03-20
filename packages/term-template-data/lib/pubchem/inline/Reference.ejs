@@ -1,0 +1,30 @@
+<% //
+
+let name = await queryLabel(entity)
+let publication = undefined
+
+const data = (await select(`
+  PREFIX dcterms: <http://purl.org/dc/terms/>
+  PREFIX prism: <http://prismstandard.org/namespaces/basic/3.0/>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+
+  SELECT ?title ?date ?publication FROM pubchem:reference WHERE
+  {
+    ?entity dcterms:title ?title .
+    ?entity dcterms:date ?date .
+    ?entity prism:publicationName ?publication .
+  }
+`, [{ entity }])).at(0)
+
+if (data) {
+  const year = new Date(data.date.value).getFullYear()
+  name = data.title.value
+  publication = `${data.publication.value}, ${year}`
+}
+%>
+
+<a href="<%= entity.value %>"><%= name %></a>
+
+<% if (publication) { %>
+<small><%= publication %></small>
+<% } %>

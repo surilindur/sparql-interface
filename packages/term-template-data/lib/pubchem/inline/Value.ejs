@@ -1,0 +1,14 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/pubchem/Synonym.vm
+
+const namedNode = await querySelectFirst(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  SELECT DISTINCT ?label WHERE
+  {
+  ?entity sio:SIO_000300 ?label .
+  }
+`, [{ entity }])
+%>
+
+<a href="<%= entity.value %>"><%= namedNode?.label?.value ?? entity.value %></a>

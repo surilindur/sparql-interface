@@ -1,0 +1,10 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/isdb/Compound.vm
+
+const regex = /.+\/(.+)_CMPD$/
+const imageUrl = entity.value.replace(regex, 'https://idsm.elixir-czech.cz/chemweb/isdb/compound/svg?id=$1')
+const title = entity.value.replace(regex, '$1')
+%>
+
+<object data="<%= imageUrl %>" type="image/svg+xml"></object>
+
+<a href="<%= entity.value %>"><%= title %></a>

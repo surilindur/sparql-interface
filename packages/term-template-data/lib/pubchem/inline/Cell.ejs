@@ -1,0 +1,22 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/pubchem/Cell.vm
+
+const organism = (await select(`
+  PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+  PREFIX up: <http://purl.uniprot.org/core/>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+
+  SELECT ?uri ?label FROM pubchem:cell FROM pubchem:taxonomy WHERE
+  {
+    ?entity up:organism ?uri .
+    ?uri skos:prefLabel ?label .
+  }
+`, [{ entity }]))?.at(0)
+%>
+
+<a href="<%= entity.value %>"><%= await queryLabel(entity) %></a>
+
+<% if (organism) { %>
+<small>
+  <a href="<%= organism.uri.value %>"><%= organism.label.value %></a>
+</small>
+<% } %>

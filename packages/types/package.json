@@ -1,0 +1,9 @@
+{
+  "name": "@idsm-src/types",
+  "version": "0.0.0",
+  "private": true,
+  "main": "lib/index.ts",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+<% // ChEMBL Molfile, does not have a label
+
+const value = await querySelectFirst(`
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  SELECT DISTINCT ?value WHERE
+  {
+    ?entity sio:SIO_000300 ?value .
+  }
+`, [{ entity }])
+%>
+
+<h2>
+  <a href="<%= entity.value %>"><%= entity.value %></a>
+</h2>
+
+<% if (value) { %>
+<pre><%= value.value.value %></pre>
+<% } %>

@@ -1,0 +1,29 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/pubchem/Patent.vm
+
+let name = await queryLabel(entity)
+let details = undefined
+
+const data = (await select(`
+  PREFIX epo: <http://data.epo.org/linked-data/def/patent/>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+
+  SELECT ?title ?date ?number FROM pubchem:patent WHERE
+  {
+    ?entity epo:titleOfInvention ?title .
+    ?entity epo:publicationNumber ?number .
+    ?entity epo:publicationDate ?date .
+  }
+`, [{ entity }])).at(0)
+
+if (data) {
+  const year = new Date(data.date.value).getFullYear()
+  name = data.title.value
+  details = `${data.number.value} (${year})`
+}
+%>
+
+<a href="<%= entity.value %>"><%= name %></a>
+
+<% if (details) { %>
+<small><%= details %></small>
+<% } %>

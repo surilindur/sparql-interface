@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DEFAULT_NODE_VERSION: 24.x
+  DEFAULT_NODE_VERSION: 25.x
 
 jobs:
 
@@ -31,45 +31,47 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: yarn install --immutable
-      - name: Run linter
-        run: yarn run lint
+      - name: Check TS files
+        run: yarn run lint:ts
+      - name: Check EJS files
+        run: yarn run lint:ejs
 
-  build:
-    name: Build
-    needs: lint
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Use Node.js ${{ env.DEFAULT_NODE_VERSION }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: yarn install --immutable
-      - name: Build application
-        run: yarn run build
-        env:
-          APPLICATION_ROOT_PATH: /sparql-interface/
-      - name: Upload build artifact
-        id: deployment
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist/
+  # build:
+  #   name: Build
+  #   needs: lint
+  #   runs-on: ubuntu-24.04-arm
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v6
+  #     - name: Use Node.js ${{ env.DEFAULT_NODE_VERSION }}
+  #       uses: actions/setup-node@v6
+  #       with:
+  #         node-version: ${{ env.DEFAULT_NODE_VERSION }}
+  #     - name: Enable corepack
+  #       run: corepack enable
+  #     - name: Install dependencies
+  #       run: yarn install --immutable
+  #     - name: Build application
+  #       run: yarn run build
+  #       env:
+  #         APPLICATION_ROOT_PATH: /sparql-interface/
+  #     - name: Upload build artifact
+  #       id: deployment
+  #       uses: actions/upload-pages-artifact@v4
+  #       with:
+  #         path: dist/
 
-  deploy:
-    name: Deploy
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+  # deploy:
+  #   name: Deploy
+  #   needs: build
+  #   permissions:
+  #     pages: write
+  #     id-token: write
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+  #   runs-on: ubuntu-24.04-arm
+  #   steps:
+  #     - name: Deploy to GitHub Pages
+  #       id: deployment
+  #       uses: actions/deploy-pages@v4

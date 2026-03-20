@@ -1,0 +1,14 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/chembl/DrugIndication.vm
+
+const mesh = await querySelectFirst(`
+  PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
+  PREFIX ebi: <http://rdf.ebi.ac.uk/dataset/>
+
+  SELECT DISTINCT ?mesh FROM ebi:chembl WHERE
+  {
+    ?entity cco:hasMeshHeading ?mesh .
+  }
+`, [{ entity }])
+%>
+
+<a href="<%= entity.value %>"><%= mesh?.mesh?.value ?? entity.value %></a>

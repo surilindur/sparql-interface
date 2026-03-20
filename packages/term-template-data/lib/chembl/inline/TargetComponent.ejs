@@ -1,0 +1,14 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/chembl/TargetComponent.vm
+
+const description = await querySelectFirst(`
+  PREFIX ebi: <http://rdf.ebi.ac.uk/dataset/>
+  PREFIX dcterms: <http://purl.org/dc/terms/>
+
+  SELECT ?description FROM ebi:chembl WHERE
+  {
+    ?entity dcterms:description ?description .
+  }
+`, [{ entity }])
+%>
+
+<a href="<%= entity.value %>"><%= description?.description?.value ?? entity.value %></a>

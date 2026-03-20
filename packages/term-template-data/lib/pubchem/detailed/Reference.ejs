@@ -1,0 +1,41 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/page/pubchem/Reference.vm
+
+const title = await querySelectFirst(`
+  PREFIX dcterms: <http://purl.org/dc/terms/>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+
+  SELECT ?title FROM pubchem:reference WHERE
+  {
+    ?entity dcterms:title ?title
+  }
+`, [{ entity }])
+
+const citationVisualisations = (await querySelectAll(`
+  PREFIX dcterms: <http://purl.org/dc/terms/>
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+
+  SELECT ?citation FROM pubchem:reference WHERE
+  {
+    ?entity dcterms:bibliographicCitation ?citation
+  }
+`, [{ entity }])).map(b => visualise(b.citation))
+%>
+
+<h2>
+  <a href="<% entity.value %>"><%= title?.title?.value ?? entity.value %></a>
+</h2>
+
+<% if (citationVisualisations.length > 0) { %>
+<h2>Citations</h2>
+<table>
+  <tbody>
+    <% for (const visualisation of citationVisualisations) { %>
+    <tr>
+      <td>
+        <%- await visualisation %>
+      </td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+<% } %>

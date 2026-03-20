@@ -1,0 +1,18 @@
+<% // ChEMBL Activity
+
+const data = await querySelectFirst(`
+  PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
+  PREFIX ebi: <http://rdf.ebi.ac.uk/dataset/>
+
+  SELECT DISTINCT ?type ?relation ?value FROM ebi:chembl WHERE
+  {
+    ?entity cco:type ?type .
+    ?entity cco:relation ?relation .
+    ?entity cco:value ?value .
+  }
+`, [{ entity }])
+
+const label = data ? `${data.type.value} ${data.relation.value} ${data.value.value}`.trim() : entity.value
+%>
+
+<a href="<%= entity.value %>"><%= label %></a>

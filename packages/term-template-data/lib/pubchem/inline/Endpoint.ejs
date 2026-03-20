@@ -1,0 +1,49 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/pubchem/Endpoint.vm
+
+const outcome = (await select(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX sio: <http://semanticscience.org/resource/>
+  PREFIX vocab: <http://rdf.ncbi.nlm.nih.gov/pubchem/vocabulary#>
+
+  SELECT ?value FROM pubchem:endpoint WHERE
+  {
+    ?entity vocab:PubChemAssayOutcome ?uri.
+
+    VALUES (?uri ?value)
+    {
+      (vocab:active "active")
+      (vocab:inactive "inactive")
+      (vocab:inconclusive "inconclusive")
+      (vocab:unspecified "unspecified")
+    }
+  }
+`, [{ entity }])).at(0)?.value?.value
+
+const measurement = (await select(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  SELECT ?label ?operator ?value FROM pubchem:endpoint WHERE
+  {
+    VALUES (?property ?operator) {
+      (sio:SIO_000300 ": ")
+      (sio:SIO_000738 " = ")
+      (sio:SIO_000734 " > ")
+      (sio:SIO_000735 " < ")
+      (sio:SIO_000699 " >= ")
+      (sio:SIO_000733 " <= ")
+    }
+    ?entity ?property ?value.
+    ?entity rdfs:label ?label.
+  }
+`, [{ entity }])).at(0)
+
+const name = `${measurement?.label?.value ?? ''}${measurement?.operator?.value ?? ''}${measurement?.value?.value}`.trim()
+%>
+
+<a href="<%= entity.value %>"><%= name %></a>
+
+<% if (outcome) { %>
+<small><%= outcome %></small>
+<% } %>

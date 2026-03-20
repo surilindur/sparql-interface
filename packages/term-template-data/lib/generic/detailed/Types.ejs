@@ -1,0 +1,113 @@
+<% // Details template for type hierarchy visualisation
+
+/*
+const entitiesWithoutLabels = [ entity ]
+
+const parents = {
+  [entity.value]: { id: entity.value, label: entity.value },
+}
+
+const hasDirectSuperClass = await queryAsk(`
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  ASK WHERE {
+    ?entity rdfs:subClassOf ?other .
+  }
+`, [{ entity }])
+
+const hasDirectSubClass = await queryAsk(`
+  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+  ASK WHERE {
+    ?other rdfs:subClassOf ?entity .
+  }
+`, [{ entity }])
+
+let types = [ { value: entity } ]
+
+if (!hasDirectSubClass && !hasDirectSuperClass) {
+  types = await querySelectAll(`
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    SELECT DISTINCT ?value ?label WHERE {
+      ?entity rdf:type ?value .
+      FILTER(!STRSTARTS(STR(?value), "http://blank/"))
+    }
+  `, [{ entity }])
+
+  for (const bindings of types) {
+    parents[bindings.value.value] = {
+      id: bindings.value.value,
+      label: bindings.value.value,
+      parentId: entity.value,
+      relation: 'type',
+    }
+    entitiesWithoutLabels.push(bindings.value)
+  }
+}
+
+const children = { ...parents }
+
+if (types.length > 0 && types.length < 10) {
+  const superTypes = await querySelectAll(`
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    SELECT DISTINCT ?type ?value ?label WHERE {
+      ?type rdfs:subClassOf ?value .
+      FILTER(?type != ?value && !STRSTARTS(STR(?value), "http://blank/"))
+    }
+  `, types.map(t => ({ type: t.value })))
+
+  for (const bindings of superTypes) {
+    parents[bindings.value.value] = {
+      id: bindings.value.value,
+      label: bindings.value.value,
+      parentId: bindings.type.value,
+      relation: 'supertype'
+    }
+    entitiesWithoutLabels.push(bindings.value)
+  }
+
+  const subTypes = await querySelectAll(`
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    SELECT DISTINCT ?type ?value ?label WHERE {
+      ?value rdfs:subClassOf ?type .
+      FILTER(?type != ?value && !STRSTARTS(STR(?value), "http://blank/"))
+    }
+  `, types.map(t => ({ type: t.value })))
+
+  for (const bindings of subTypes) {
+    children[bindings.value.value] = {
+      id: bindings.value.value,
+      label: bindings.value.value,
+      parentId: bindings.type.value,
+      relation: 'subtype'
+    }
+    entitiesWithoutLabels.push(bindings.value)
+  }
+
+  const labels = await querySelectAll(`
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    SELECT DISTINCT ?entity ?label WHERE {
+      ?entity rdfs:label ?label .
+    }
+  `, entitiesWithoutLabels.map(e => ({ entity: e })))
+
+  for (const bindings of labels) {
+    if (parents[bindings.entity.value]) {
+      parents[bindings.entity.value].label = bindings.label.value
+    }
+    if (children[bindings.entity.value]) {
+      children[bindings.entity.value].label = bindings.label.value
+    }
+  }
+}
+
+const output = { parents: Object.values(parents), children: Object.values(children) }
+*/
+%>
+
+<h2>Type hierarchy sample</h2>
+
+<%- await visualiseTypes(entity) %>

@@ -1,0 +1,14 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/chembl/Mechanism.vm
+
+const description = await querySelectFirst(`
+  PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
+  PREFIX ebi: <http://rdf.ebi.ac.uk/dataset/>
+
+  SELECT DISTINCT ?description FROM ebi:chembl WHERE
+  {
+    ?entity cco:mechanismDescription ?description
+  }
+`, [{ entity }])
+%>
+
+<a href="<%= entity.value %>"><%= description?.description?.value ?? entity.value %></a>

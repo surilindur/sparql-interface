@@ -1,0 +1,11 @@
+<% // Generic template for literals %>
+
+<%= entity.value %>
+
+<% if (entity.language) { %>
+<small class="language"><%= entity.language %></small>
+<% } %>
+
+<small class="datatype">
+  <a href="<%= entity.datatype.value %>"><%- await visualise(entity.datatype) %></a>
+</small>

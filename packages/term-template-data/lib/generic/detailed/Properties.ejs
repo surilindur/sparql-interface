@@ -1,0 +1,40 @@
+<% // Details template for property visualisation
+
+const propertyLimit = 500
+
+const properties = entity.termType === 'NamedNode' ? await querySelectAll(`
+  SELECT DISTINCT ?property ?value WHERE {
+    ?entity ?property ?value .
+  } ORDER BY ?property LIMIT ${propertyLimit}
+`, [{ entity }]) : []
+
+//properties.sort((a, b) => a.property.value < b.property.value ? -1 : 1)
+
+const visualisationPromises = properties.map(p => ({
+  key: visualise(p.property),
+  value: visualise(p.value),
+}))
+%>
+
+<% if (visualisationPromises.length > 0) { %>
+<h2>Properties</h2>
+<table>
+  <tbody>
+    <% for (const { key, value } of visualisationPromises) { %>
+    <tr>
+      <th>
+        <%- await key %>
+      </th>
+      <td>
+        <%- await value %>
+      </td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+
+<% if (visualisationPromises.length === propertyLimit) { %>
+<p>Only the first <%= propertyLimit %> properties are displayed for performance reasons. Please run a full query on the
+  subject to access more properties as needed.</p>
+<% } %>
+<% } %>

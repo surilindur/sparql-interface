@@ -1,0 +1,23 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/item/pubchem/Author.vm
+
+const data = await querySelectFirst(`
+  PREFIX pubchem: <http://rdf.ncbi.nlm.nih.gov/pubchem/>
+  PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+
+  SELECT ?full_name ?family_name ?given_name FROM pubchem:author WHERE
+  {
+    ?entity vcard:fn ?value .
+    OPTIONAL
+    {
+      ?entity vcard:given-name|vcard:hasGivenName ?given_name .
+      ?entity vcard:family-name|vcard:hasFamilyName ?family_name .
+    }
+  }
+`, [{ entity }])
+
+const label = data?.full_name?.value ??
+  `${data?.given_name?.value ?? ''} ${data?.family_name?.value ?? ''}`.trim() ??
+  entity.value
+%>
+
+<a href="<%= entity.value %>"><%= label %></a>

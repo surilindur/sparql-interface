@@ -1,0 +1,89 @@
+<% // https://github.com/idsm-src/server/blob/develop/service/src/main/webapp/templates/page/mona/Compound.vm
+
+const nameVisualisations = (await select(`
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX mona: <https://idsm.elixir-czech.cz/rdf/mona/>
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  SELECT ?name FROM mona: WHERE
+  {
+    ?entity sio:SIO_000008 ?D.
+    ?D rdf:type sio:CHEMINF_000043.
+    ?D sio:SIO_000300 ?name.
+  }
+`, [{ entity }])).map(b => visualise(b.name))
+
+const structuresExist = await ask(`
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX mona: <https://idsm.elixir-czech.cz/rdf/mona/>
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  ASK FROM mona: WHERE
+  {
+    ?entity sio:SIO_000008 ?S.
+    ?S rdf:type sio:SIO_011120.
+    ?S sio:SIO_000300 ?V.
+  }
+`, [{ entity }])
+
+const descriptors = await select(`
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX mona: <https://idsm.elixir-czech.cz/rdf/mona/>
+  PREFIX sio: <http://semanticscience.org/resource/>
+
+  SELECT ?title ?value ?unit FROM mona: WHERE
+  {
+    ?entity sio:SIO_000008 ?D.
+    ?D rdf:type ?TYPE.
+    ?D sio:SIO_000300 ?value.
+  }
+  VALUES (?TYPE ?title ?unit)
+  {
+    (sio:CHEMINF_000042 "molecular formula" UNDEF)
+    (sio:CHEMINF_000018 "SMILES" UNDEF)
+    (sio:CHEMINF_000113 "IUPAC InChI" UNDEF)
+    (sio:CHEMINF_000059 "IUPAC InChIKey" UNDEF)
+    (sio:CHEMINF_000217 "exact mass" "g/mol")
+    (sio:CHEMINF_000218 "monoisotopic mass" "g/mol")
+  }
+`, [{ entity }])
+
+const imageUrl = entity.value.replace(/.+\/(.+)_CMPD$/, 'https://idsm.elixir-czech.cz/chemweb/mona/compound/svg?id=$1')
+%>
+
+<table>
+  <tbody>
+    <% if (nameVisualisations.length > 0) { %>
+    <tr>
+      <th>Names</th>
+      <td>
+        <% for (const visualisation of nameVisualisations) { %>
+        <%- await visualisation %>
+        <% } %>
+      </td>
+    </tr>
+    <% } %>
+    <% if (structuresExist) { %>
+    <tr>
+      <th>Structure</th>
+      <td>
+        <object data="<%= imageUrl %>" type="image/svg+xml"></object>
+      </td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+
+<% if (descriptors.length > 0) { %>
+<h2>Descriptors</h2>
+<table>
+  <tbody>
+    <% for (const descriptor of descriptors) { %>
+    <tr>
+      <th><%= descriptor.title.value %></th>
+      <td class="prewrap"><%= `${descriptor.value.value} ${descriptor.unit?.value ?? ''}`.trim() %></td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+<% } %>
