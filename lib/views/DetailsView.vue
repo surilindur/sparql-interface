@@ -1,21 +1,17 @@
 <script setup lang="ts">
-import type * as RDF from '@rdfjs/types'
 import { onMounted, ref, useTemplateRef } from 'vue'
+import { useRouter, RouterLink } from 'vue-router'
+import { visualisePage } from '../logic/visualisation'
 import { renderHierarchy } from '../logic/hierarchy'
 import { renderSpectrum } from '../logic/spectrum'
 import { inlineVectorImages, updateLinkProperties } from '../logic/elements'
 import { invocationCount, queryCount, dataFactory } from '../logic/query'
 
-const props = defineProps<{
-  entity: RDF.Term,
-  domParser: DOMParser,
-  visualise: (entity: RDF.Term) => Promise<string>,
-}>()
-
-const emit = defineEmits<{
-  (e: 'close'): void,
-  (e: 'inspect', entity: RDF.Term): void,
-}>()
+const router = useRouter()
+const domParser = new DOMParser()
+const locationQuery = new URL(window.location.href)
+const sparqlEndpoint = locationQuery.searchParams.get('endpoint')!
+const targetTerm = dataFactory.namedNode(locationQuery.searchParams.get('term')!)
 
 const container = useTemplateRef('container')
 const loading = ref<boolean>(false)
@@ -62,7 +58,7 @@ async function visualiseCustomElements(): Promise<void> {
         event.preventDefault()
         const e = dataFactory.namedNode(href)
         console.log('INSPECT', e)
-        emit('inspect', e)
+        router.replace({ query: { term: targetTerm.value, endpoint: sparqlEndpoint } })
       })
     }
   }
@@ -71,8 +67,8 @@ async function visualiseCustomElements(): Promise<void> {
 async function visualiseResult(): Promise<void> {
   loading.value = true
   try {
-    const output = await props.visualise(props.entity)
-    const tree = props.domParser.parseFromString(output, 'text/html')
+    const output = await visualisePage(targetTerm, sparqlEndpoint)
+    const tree = domParser.parseFromString(output, 'text/html')
     container.value!.append(...tree.body.children)
     setTimeout(visualiseCustomElements)
   } catch (error: unknown) {
@@ -95,9 +91,9 @@ onMounted(visualiseResult)
     <nav>
       <h1>Result details</h1>
       <small>{{ invocationCount }} / {{ queryCount }} queries</small>
-      <button @click="() => emit('close')">
+      <RouterLink to="/">
         Close
-      </button>
+      </RouterLink>
     </nav>
     <span
       v-if="loading"
