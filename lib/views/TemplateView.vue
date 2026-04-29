@@ -1,51 +1,81 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import type { ITemplate } from '../types/template'
-import { resetTemplate, listTemplates, resetAllTemplates } from '../logic/template'
+import type { ITermTemplateCollection } from '../logic/types'
+import { disableTemplateCollection, enableTemplateCollection, listTemplateCollections, removeTemplateCollection } from '../logic/templates'
 
-import TemplateEditor from '../components/TemplateEditor.vue'
-import TemplateList from '../components/TemplateList.vue'
+const collections = ref<ITermTemplateCollection[]>([])
+const newCollection = ref<string>()
 
-const emit = defineEmits<{
-  (e: 'close'): void,
-}>()
+onMounted(async() => {
+  collections.value.push(...await listTemplateCollections())
+})
 
-const templates = ref<ITemplate[]>([])
-const editing = ref<ITemplate>()
-
-function onEditorClosed() {
-  editing.value = undefined
-  templates.value = listTemplates()
+async function onCollectionEnable(url: string) {
+  collections.value = await enableTemplateCollection(url)
 }
 
-function onTemplateReset(template: ITemplate): void {
-  editing.value = undefined
-  templates.value = resetTemplate(template)
+async function onCollectionDisable(url: string) {
+  collections.value = await disableTemplateCollection(url)
 }
 
-function onAllTemplateReset(): void {
-  templates.value = resetAllTemplates()
+async function onCollectionRemove(url: string) {
+  collections.value = await removeTemplateCollection(url)
 }
-
-function onTemplateEdit(template: ITemplate): void {
-  editing.value = template
-}
-
-onMounted(onEditorClosed)
 </script>
 
 <template>
-  <TemplateEditor
-    v-if="editing"
-    :template="editing"
-    @close="onEditorClosed"
-  />
-  <TemplateList
-    v-else
-    :templates="templates"
-    @reset="onTemplateReset"
-    @edit="onTemplateEdit"
-    @resetall="onAllTemplateReset"
-    @close="() => emit('close')"
-  />
+  <nav>
+    <h1>Templates</h1>
+  </nav>
+  <table>
+    <thead>
+      <tr>
+        <th class="index" /> <!-- template index -->
+        <th>Name</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="({ url, name, description, enabled }, index) of collections"
+        :key="url"
+      >
+        <td class="index">
+          {{ index }}
+        </td>
+        <td>{{ name }}</td>
+        <td>{{ description }}</td>
+        <td>
+          <span class="row">
+            <button
+              class="button"
+              @click="() => enabled ? onCollectionDisable(url) : onCollectionEnable(url)"
+            >{{ enabled ? 'Disable' : 'Enable' }}</button>
+            <button
+              class="button"
+              @click="() => onCollectionRemove(url)"
+            >Remove</button>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td />
+        <td colspan="2">
+          <input
+            v-model="newCollection"
+            type="url"
+          >
+        </td>
+        <td>
+          <button
+            class="button"
+            @click="() => onCollectionEnable(newCollection!)"
+          >
+            Add
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>

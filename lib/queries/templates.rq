@@ -1,0 +1,13 @@
+PREFIX schema: <https://schema.org/>
+
+SELECT DISTINCT ?template ?fragment ?target ?pattern ?content WHERE {
+    ?template a schema:SoftwareSourceCode .
+    ?template schema:text ?content .
+    ?template schema:pattern ?pattern .
+
+    OPTIONAL {
+        ?template schema:target ?target .
+    }
+
+    BIND(IF(EXISTS { ?template schema:codeSampleType "fragment" }, true, false) AS ?fragment)
+}

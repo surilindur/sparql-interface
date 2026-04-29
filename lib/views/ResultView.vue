@@ -2,18 +2,17 @@
 import type * as RDF from '@rdfjs/types'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import type { IBindings } from 'fetch-sparql-endpoint'
-import { visualiseItem } from '../logic/visualisation'
-import { dataFactory, endpointFetcher, getInScopeVariables, invocationCount, queryCount } from '../logic/query'
+import type { IBindings } from '../logic/types'
+import { visualiseTerm } from '../logic/templates'
+import { dataFactory, queryEngine, getInScopeVariables, invocationCount, queryCount } from '../logic/query'
 import QueryResultTable from '../components/QueryResultTable.vue'
+import { bindingsToRecord } from '../logic/utils'
 
 const router = useRouter()
 const domParser = new DOMParser()
 const locationQuery = new URL(window.location.href)
 const sparqlEndpoint = locationQuery.searchParams.get('endpoint')!
 const sparqlQuery = locationQuery.searchParams.get('query')!
-
-let resultStream: _Readable | undefined
 
 const resultVariables = ref<RDF.Variable[]>([])
 const resultBindings = ref<IBindings[]>([])
@@ -23,7 +22,7 @@ async function executeAsk(): Promise<void> {
   resultVariables.value = [ dataFactory.variable('ask') ]
   invocationCount.value++
   queryCount.value++
-  const result = await endpointFetcher.fetchAsk(sparqlEndpoint, sparqlQuery)
+  const result = await queryEngine.queryBoolean(sparqlQuery, { sources: [ sparqlEndpoint ] })
   resultBindings.value = [
     {
       ask: dataFactory.literal(
@@ -45,15 +44,13 @@ async function executeConstruct(): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     invocationCount.value++
     queryCount.value++
-    endpointFetcher.fetchTriples(sparqlEndpoint, sparqlQuery).then(quadStream => {
-      resultStream = quadStream
+    queryEngine.queryQuads(sparqlQuery, { sources: [ sparqlEndpoint ] }).then(quadStream => {
       quadStream
         .on('data', quad => resultBindings.value.push(quad))
         .on('error', reject)
         .on('end', resolve)
     }).catch(reject)
   })
-  resultStream = undefined
 }
 
 async function executeSelect(): Promise<void> {
@@ -62,72 +59,55 @@ async function executeSelect(): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     invocationCount.value++
     queryCount.value++
-    endpointFetcher.fetchBindings(sparqlEndpoint, sparqlQuery).then(bindingsStream => {
+    queryEngine.queryBindings(sparqlQuery, { sources: [ sparqlEndpoint ] }).then(bindingsStream => {
       bindingsStream
-        .on('data', bindings => resultBindings.value.push(bindings))
+        .on('data', (bindings: RDF.Bindings) => resultBindings.value.push(bindingsToRecord(bindings)))
         .on('error', reject)
         .on('end', resolve)
     }).catch(reject)
   })
-  resultStream = undefined
 }
 
 async function executeQuery(): Promise<void> {
   invocationCount.value = 0
   queryCount.value = 0
   try {
-    switch (endpointFetcher.getQueryType(sparqlQuery)) {
-      case 'ASK':
-        await executeAsk()
-        break
-      case 'CONSTRUCT':
-        await executeConstruct()
-        break
-      case 'SELECT':
-        await executeSelect()
-        break
-      default:
-        throw new Error(`Unknown type of query: ${sparqlQuery}`)
+    if (sparqlQuery.includes('ASK')) {
+      await executeAsk()
+    } else if (sparqlQuery.includes('CONSTRUCT')) {
+      await executeConstruct()
+    } else if (sparqlQuery.includes('SELECT')) {
+      await executeSelect()
+    } else {
+      throw new Error(`Unknown type of query: ${sparqlQuery}`)
     }
   } catch (error: unknown) {
     queryError.value = error
   }
 }
 
-function onClose(): void {
-  if (resultStream) {
-    resultStream.emit('end')
-  }
-  router.push({ path: '/' })
-}
-
 onMounted(executeQuery)
 </script>
 
 <template>
-  <section class="sparqlresults">
-    <nav>
-      <h1>Query results</h1>
-      <small>{{ resultBindings.length }} rows, {{ invocationCount }} / {{ queryCount }} queries</small>
-      <button @click="onClose">
-        Close
-      </button>
-    </nav>
-    <pre
-      v-if="queryError"
-      class="error"
-    >{{ queryError }}</pre>
-    <span
-      v-else-if="resultBindings.length < 1"
-      class="loading"
-    />
-    <QueryResultTable
-      v-else
-      :bindings="resultBindings"
-      :variables="resultVariables"
-      :visualise="(e) => visualiseItem(e, sparqlEndpoint)"
-      :dom-parser="domParser"
-      @inspect="(term: RDF.Term) => router.push({ path: '/details', query: { term: term.value, endpoint: sparqlEndpoint } })"
-    />
-  </section>
+  <nav>
+    <h1>Query results</h1>
+    <small>{{ resultBindings.length }} rows, {{ invocationCount }} / {{ queryCount }} queries</small>
+  </nav>
+  <pre
+    v-if="queryError"
+    class="error"
+  >{{ queryError }}</pre>
+  <span
+    v-else-if="resultBindings.length < 1"
+    class="loading"
+  />
+  <QueryResultTable
+    v-else
+    :bindings="resultBindings"
+    :variables="resultVariables"
+    :visualise="(e) => visualiseTerm(e, sparqlEndpoint)"
+    :dom-parser="domParser"
+    @inspect="(term: RDF.Term) => router.push({ path: '/details', query: { term: term.value, endpoint: sparqlEndpoint } })"
+  />
 </template>

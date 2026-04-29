@@ -1,12 +1,12 @@
-import type { IBindings } from 'fetch-sparql-endpoint'
+import type { IBindings } from './types'
 import { Algebra, algebraUtils } from '@traqula/algebra-transformations-1-1'
 import { LRUCache } from 'lru-cache'
 import {
   type QueryBuffer,
   algebraFactory,
   bindingsToValues,
-  queryBindings,
   executeBatched,
+  queryEngine,
   queryCacheMaxEntries,
   queryCacheMaxAgeMilliseconds,
   queryIdentifierVariable,
@@ -40,11 +40,12 @@ async function execute(batchIdentifier: string): Promise<void> {
   try {
     queryCount.value++
 
-    const bindingsArray = await queryBindings(batch.endpoint, serialiseQuery(query))
+    const queryString = serialiseQuery(query)
+    const bindingsStream = await queryEngine.queryBindings(queryString, { sources: [ batch.source ] })
 
     // Report existence to their corresponding queries
-    for (const bindings of bindingsArray) {
-      const queryIdentifier = bindings[queryIdentifierVariable.value]!.value
+    for await (const bindings of bindingsStream) {
+      const queryIdentifier = bindings.get(queryIdentifierVariable)!.value
       queryCache.set(queryIdentifier, true)
       for (const resolution of batch.resolutions[queryIdentifier]!) {
         resolution(true)
@@ -71,11 +72,11 @@ async function execute(batchIdentifier: string): Promise<void> {
   }
 }
 
-async function ask(endpoint: string, query: string, bindings: IBindings[]): Promise<boolean> {
+async function ask(source: string, query: string, bindings: IBindings[]): Promise<boolean> {
   invocationCount.value++
-  const queryIdentifier = generateQueryIdentifier(endpoint, query, bindings)
+  const queryIdentifier = generateQueryIdentifier(source, query, bindings)
   const cachedBoolean = queryCache.get(queryIdentifier)
-  return cachedBoolean ? Promise.resolve(cachedBoolean) : executeBatched<boolean>(endpoint, query, bindings, queryBuffer, execute)
+  return cachedBoolean ? Promise.resolve(cachedBoolean) : executeBatched<boolean>(source, query, bindings, queryBuffer, execute)
 }
 
 export { ask }

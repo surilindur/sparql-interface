@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type * as RDF from '@rdfjs/types'
-import type { IBindings } from 'fetch-sparql-endpoint'
+import type { IBindings } from '../logic/types'
 import QueryResult from './QueryResult.vue'
 
 defineProps<{

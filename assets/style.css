@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-
 :root {
   --color-primary: #121619;
   --color-secondary: #dde1e6;
@@ -8,19 +6,11 @@
   --color-highlight: #0062ff;
   --color-attention: #da1d27;
 
-  --content-margin: max(2rem, calc((100% - max(1200px, 80%)) / 2));
+  --content-margin: 4rem;
   --content-border: .1rem solid var(--color-secondary);
 
-  --font-weight-normal: 400;
-  --font-weight-bold: 500;
-
-  text-rendering: optimizeLegibility !important;
   text-underline-position: under;
-  font-family: "Roboto", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: var(--font-weight-normal);
-  font-style: normal;
-  font-variation-settings: "wdth" 100;
+  font-family: sans-serif;
   font-size: 1em;
   line-height: 1.6;
 
@@ -40,8 +30,7 @@
 
 html,
 body,
-main,
-main>section {
+main {
   margin: 0;
   padding: 0;
   display: flex;
@@ -55,43 +44,17 @@ pre,
 code,
 td.index,
 th.index {
-  font-family: "Roboto Mono", monospace;
+  font-family: monospace;
   font-size: .8rem;
 }
 
 h1,
 th {
-  font-weight: var(--font-weight-bold);
+  font-weight: bold;
 }
 
 h1 {
   font-size: 1rem;
-  font-weight: var(--font-weight-bold);
-}
-
-input:not([type="file"]),
-button,
-select,
-table td,
-table th {
-  color: var(--color-primary);
-  border: var(--content-border);
-  background: none;
-  padding: .4rem .6rem;
-  text-align: left;
-  vertical-align: middle;
-}
-
-button {
-  cursor: pointer;
-  background-color: var(--color-tertiary);
-}
-
-button:not(:disabled):focus,
-button:not(:disabled):hover {
-  color: var(--color-background);
-  background-color: var(--color-highlight);
-  border-color: var(--color-highlight);
 }
 
 a {
@@ -105,8 +68,35 @@ a:focus {
 }
 
 a.active,
-button:active {
+.button:active {
   opacity: .4;
+}
+
+.button,
+input:not([type="file"]),
+select,
+table td,
+table th {
+  color: var(--color-primary);
+  border: var(--content-border);
+  background: none;
+  padding: .4rem .6rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.button {
+  font-size: .8rem;
+  cursor: pointer;
+  background-color: var(--color-tertiary);
+}
+
+.button:not(:disabled):focus,
+.button:not(:disabled):hover {
+  color: var(--color-background);
+  background-color: var(--color-highlight);
+  border-color: var(--color-highlight);
+  text-decoration: none;
 }
 
 table {
@@ -126,17 +116,11 @@ td.index {
 
 /* Layout */
 
-main>section {
+main {
   gap: 1rem;
-  padding-bottom: 2rem;
 }
 
-main>section>*:not(nav) {
-  margin-left: var(--content-margin);
-  margin-right: var(--content-margin);
-}
-
-nav {
+main>nav {
   padding-top: 1rem;
   padding-bottom: 1rem;
   padding-left: var(--content-margin);
@@ -145,22 +129,24 @@ nav {
   border-bottom: var(--content-border);
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 1rem;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-nav>* {
-  margin-top: auto;
-  margin-bottom: auto;
+main>nav>* {
+  margin: 0;
 }
 
-nav>h1 {
+main>nav>h1 {
   margin-right: auto;
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: 0;
+}
+
+main>*:not(nav) {
+  margin-left: var(--content-margin);
+  margin-right: var(--content-margin);
 }
 
 /* Custom classes */

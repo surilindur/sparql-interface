@@ -1,0 +1,6 @@
+PREFIX schema: <https://schema.org/>
+
+SELECT DISTINCT ?collection ?name ?description WHERE {
+    ?collection schema:name ?name .
+    ?collection schema:description ?description .
+}

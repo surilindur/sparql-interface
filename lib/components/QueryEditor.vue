@@ -4,67 +4,54 @@ import { Compartment, EditorState } from '@codemirror/state'
 import { githubDark } from '@fsegurai/codemirror-theme-github-dark'
 import { githubLight } from '@fsegurai/codemirror-theme-github-light'
 import { EditorView, type ViewUpdate, keymap, lineNumbers } from '@codemirror/view'
-import { defaultKeymap } from '@codemirror/commands'
+import { defaultKeymap, indentWithTab } from '@codemirror/commands'
 import { sparql } from '../logic/sparql'
 
-const props = defineProps({
-  queryString: { type: String, default: '' },
-  emitDelayMilliseconds: { type: Number, default: 100 }
-})
-
-const emit = defineEmits<{
-  (e: 'change', query: string): void,
-  (e: 'error', error: unknown): void
+const props = defineProps<{
+  defaultQuery: string
+  updateDelay: number
 }>()
 
-const editor = useTemplateRef('editor')
-const editorTheme = new Compartment()
+const emit = defineEmits<{
+  (e: 'update', value: string): void
+}>()
 
 let editorView: EditorView | undefined
 let updateTimeout: NodeJS.Timeout | undefined
 
-function createInitialState(): EditorState {
-  return EditorState.create({
-    doc: props.queryString,
-    extensions: [
-      keymap.of(defaultKeymap),
-      lineNumbers(),
-      sparql(),
-      EditorView.updateListener.of((update: ViewUpdate) => {
-        if (update.docChanged) {
-          clearTimeout(updateTimeout)
-          updateTimeout = setTimeout(() => {
-            try {
-              emit('change', update.state.doc.toString())
-            } catch (error) {
-              emit('error', error)
-            }
-          }, props.emitDelayMilliseconds)
-        }
-      }),
-      editorTheme.of(window.matchMedia('(prefers-color-scheme: dark)').matches ? githubDark : githubLight)
-    ]
-  })
-}
+const editorContainer = useTemplateRef('queryeditor')
+const editorTheme = new Compartment()
+
+const createEditorState = () => EditorState.create({
+  doc: props.defaultQuery,
+  extensions: [
+    keymap.of([ ...defaultKeymap, indentWithTab ]),
+    lineNumbers(),
+    sparql(),
+    EditorView.updateListener.of((update: ViewUpdate) => {
+      if (update.docChanged) {
+        clearTimeout(updateTimeout)
+        updateTimeout = setTimeout(() => emit('update', update.state.doc.toString()), props.updateDelay)
+      }
+    }),
+    editorTheme.of(window.matchMedia('(prefers-color-scheme: dark)').matches ? githubDark : githubLight)
+  ]
+})
 
 onMounted(() => {
-  editorView = new EditorView({ state: createInitialState(), parent: editor.value! })
-
+  editorView = new EditorView({ state: createEditorState(), parent: editorContainer.value! })
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-    editorView!.dispatch({
+    editorView?.dispatch({
       effects: editorTheme.reconfigure(event.matches ? githubDark : githubLight)
     })
   })
 })
 
 onUpdated(() => {
-  editorView?.setState(createInitialState())
+  editorView?.setState(createEditorState())
 })
 </script>
 
 <template>
-  <section
-    ref="editor"
-    class="query-editor"
-  />
+  <div ref="queryeditor" />
 </template>

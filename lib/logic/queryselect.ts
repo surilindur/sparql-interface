@@ -1,4 +1,4 @@
-import type { IBindings } from 'fetch-sparql-endpoint'
+import type { IBindings } from './types'
 import { Algebra, algebraUtils } from '@traqula/algebra-transformations-1-1'
 import { LRUCache } from 'lru-cache'
 import {
@@ -6,15 +6,16 @@ import {
   queryIdentifierVariable,
   bindingsToValues,
   algebraFactory,
-  queryBindings,
   executeBatched,
   queryCacheMaxEntries,
   queryCacheMaxAgeMilliseconds,
   generateQueryIdentifier,
   serialiseQuery,
   queryCount,
-  invocationCount
+  invocationCount,
+  queryEngine
 } from './query'
+import { bindingsToRecord } from './utils'
 
 const queryCache = new LRUCache<string, IBindings[]>({ max: queryCacheMaxEntries, ttl: queryCacheMaxAgeMilliseconds })
 const queryBuffer: QueryBuffer<IBindings[]> = {}
@@ -38,15 +39,16 @@ async function execute(batchIdentifier: string): Promise<void> {
     queryCount.value++
 
     const queryString = serialiseQuery(query)
-    const bindingsArray = await queryBindings(batch.endpoint, queryString)
+    const bindingsStream = await queryEngine.queryBindings(queryString, { sources: [ batch.source ] })
     const bindingsByQuery: Record<string, IBindings[]> = {}
 
-    for (const bindings of bindingsArray) {
-      const queryIdentifier = bindings[queryIdentifierVariable.value]!.value
+    for await (const bindings of bindingsStream) {
+      const queryIdentifier = bindings.get(queryIdentifierVariable)!.value
+      const bindingsRecord = bindingsToRecord(bindings)
       if (bindingsByQuery[queryIdentifier]) {
-        bindingsByQuery[queryIdentifier].push(bindings)
+        bindingsByQuery[queryIdentifier].push(bindingsRecord)
       } else {
-        bindingsByQuery[queryIdentifier] = [ bindings ]
+        bindingsByQuery[queryIdentifier] = [ bindingsRecord ]
       }
     }
 
@@ -78,11 +80,11 @@ async function execute(batchIdentifier: string): Promise<void> {
   }
 }
 
-async function select(endpoint: string, query: string, bindings: IBindings[]): Promise<IBindings[]> {
+async function select(source: string, query: string, bindings: IBindings[]): Promise<IBindings[]> {
   invocationCount.value++
-  const queryIdentifier = generateQueryIdentifier(endpoint, query, bindings)
+  const queryIdentifier = generateQueryIdentifier(source, query, bindings)
   const cachedBindings = queryCache.get(queryIdentifier)
-  return cachedBindings ? Promise.resolve(cachedBindings) : executeBatched<IBindings[]>(endpoint, query, bindings, queryBuffer, execute)
+  return cachedBindings ? Promise.resolve(cachedBindings) : executeBatched<IBindings[]>(source, query, bindings, queryBuffer, execute)
 }
 
 export { select }

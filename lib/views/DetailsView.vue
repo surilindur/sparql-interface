@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
-import { visualisePage } from '../logic/visualisation'
-import { renderHierarchy } from '../logic/hierarchy'
-import { renderSpectrum } from '../logic/spectrum'
-import { inlineVectorImages, updateLinkProperties } from '../logic/elements'
+import { useRouter } from 'vue-router'
+import { visualiseTermFragments } from '../logic/templates'
+import { renderHierarchy } from '../visualisation/hierarchy'
+import { renderSpectrum } from '../visualisation/spectrum'
+import { inlineVectorImages, updateLinkProperties } from '../visualisation/elements'
 import { invocationCount, queryCount, dataFactory } from '../logic/query'
 
 const router = useRouter()
@@ -67,7 +67,7 @@ async function visualiseCustomElements(): Promise<void> {
 async function visualiseResult(): Promise<void> {
   loading.value = true
   try {
-    const output = await visualisePage(targetTerm, sparqlEndpoint)
+    const output = await visualiseTermFragments(targetTerm, sparqlEndpoint)
     const tree = domParser.parseFromString(output, 'text/html')
     container.value!.append(...tree.body.children)
     setTimeout(visualiseCustomElements)
@@ -84,20 +84,12 @@ onMounted(visualiseResult)
 </script>
 
 <template>
-  <section
-    ref="container"
-    class="sparqldetails"
-  >
-    <nav>
-      <h1>Result details</h1>
-      <small>{{ invocationCount }} / {{ queryCount }} queries</small>
-      <RouterLink to="/">
-        Close
-      </RouterLink>
-    </nav>
-    <span
-      v-if="loading"
-      class="loading"
-    />
-  </section>
+  <nav>
+    <h1>Result details</h1>
+    <small>{{ invocationCount }} / {{ queryCount }} queries</small>
+  </nav>
+  <span
+    v-if="loading"
+    class="loading"
+  />
 </template>

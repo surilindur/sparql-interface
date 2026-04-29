@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type * as RDF from '@rdfjs/types'
 import { onMounted, ref, useTemplateRef } from 'vue'
-import { inlineVectorImages, updateLinkProperties } from '../logic/elements'
+import { inlineVectorImages, updateLinkProperties } from '../visualisation/elements'
 
 const props = defineProps<{
   visualise: (entity: RDF.Term | undefined) => Promise<string>,
