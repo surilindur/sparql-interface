@@ -186,22 +186,8 @@ table tr td:last-child {
   word-wrap: anywhere;
 }
 
-@keyframes loadingColourLoop {
-  from {
-    background-color: var(--color-background);
-  }
-
-  to {
-    background-color: var(--color-tertiary);
-  }
-}
-
-.loading {
-  animation-name: loadingColourLoop;
-  animation-duration: 800ms;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-  padding: 1rem;
+.loading::after {
+  content: 'Loading...';
 }
 
 .error {
